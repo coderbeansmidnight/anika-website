@@ -262,10 +262,22 @@ function initCopyEmail(): void {
   });
 }
 
+document.documentElement.classList.add('js');
+
 document.addEventListener('DOMContentLoaded', () => {
-  renderResume();
-  initTheme();
-  initScrollSpy();
-  initScrollReveal();
-  initCopyEmail();
+  const inits: Array<[string, () => void]> = [
+    ['theme', initTheme],
+    ['scroll spy', initScrollSpy],
+    ['scroll reveal', initScrollReveal],
+    ['copy email', initCopyEmail],
+    ['resume', renderResume],
+  ];
+
+  for (const [name, fn] of inits) {
+    try {
+      fn();
+    } catch (err) {
+      console.error(`Failed to initialize ${name}:`, err);
+    }
+  }
 });

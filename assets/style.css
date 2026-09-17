@@ -238,13 +238,16 @@ button:focus-visible {
 
 /* Scroll reveal */
 
-.reveal {
+/* Scroll reveal — only hides content once JS has actually started running,
+   so a script error or blocked JS never leaves a section permanently blank. */
+
+.js .reveal {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.reveal.is-visible {
+.js .reveal.is-visible {
   opacity: 1;
   transform: none;
 }
