@@ -7,7 +7,7 @@
 // render straight from this list.
 // ---------------------------------------------------------------------------
 
-type Category = 'work' | 'education' | 'skills' | 'projects' | 'leadership' | 'awards';
+type Category = 'work' | 'education' | 'research' | 'skills' | 'projects' | 'leadership' | 'awards';
 
 interface ResumeEntry {
   category: Category;
@@ -20,6 +20,7 @@ interface ResumeEntry {
 const CATEGORY_META: Record<Category, { label: string; color: string }> = {
   work: { label: 'Work Experience', color: 'var(--blue)' },
   education: { label: 'Education', color: 'var(--green)' },
+  research: { label: 'Research', color: 'var(--red)' },
   skills: { label: 'Skills', color: 'var(--purple)' },
   projects: { label: 'Projects', color: 'var(--pink)' },
   leadership: { label: 'Leadership & Volunteering', color: 'var(--teal)' },
@@ -29,50 +30,94 @@ const CATEGORY_META: Record<Category, { label: string; color: string }> = {
 const CATEGORY_ORDER: Category[] = ['work', 'education', 'skills', 'projects', 'leadership', 'awards'];
 
 const RESUME_ENTRIES: ResumeEntry[] = [
+  // --- Work Experience ---------------------------------------------------
   {
     category: 'work',
-    title: 'Software Engineer Intern',
-    subtitle: 'Example Company',
-    dates: 'Summer 2025',
+    title: 'Systems Engineering Intern',
+    subtitle: 'Lockheed Martin',
+    dates: 'May 2025 to August 2026',
     bullets: [
-      'Replace with what you actually worked on — one line per bullet.',
-      'Focus on impact and specifics: what changed because of the work.',
+      'Developed scripts to reduce metrics processing time by 90%, saving hours of work for Systems Engineers',
+      'Developed visualizations to model requirements data using Python and Pandas',
+      'Researched project management processes and presented findings to 15+ stakeholders, including Chief Engineer',
+      'Assisted Systems Engineer spec authors in crafting multi-functional requirements in DOORS Next Gen',
     ],
   },
+  // Copy the block above and paste it here for each job/internship.
+
+  // --- Education -----------------------------------------------------
   {
     category: 'education',
-    title: 'B.S. in Computer Science',
-    subtitle: 'Your University',
-    dates: '2023 – 2027',
-    bullets: ['Relevant coursework, GPA, honors — whatever is worth surfacing.'],
+    title: 'B.A. in Data Science',
+    subtitle: 'U.C. Berkeley',
+    dates: 'Expected May 2028',
+    bullets: [
+      'Currently taking NewSpace Decal working on a project with US Space Force to explore scientific autonomy of AI systems.',
+    ],
+  },
+  // --- Research -----------------------------------------------------
+  {
+    category: 'research',
+    title: 'Student Researcher',
+    subtitle: 'Space Sciences Laboratory',
+    dates: 'Sept 2026 to Present',
+    bullets: [
+      'Assisting with analysis of data from NASA Carruthers mission',
+    ],
+  },
+
+  // --- Skills --------------------------------------------------------
+  {
+    category: 'skills',
+    title: 'Technical & Tools',
+    bullets: [
+      'Python, Java, JavaScript, MySQL, REST APIs, HTML, CSS, Git, GitLab, Docker, Pandas, Tableau, Figma, Confluence',
+    ],
   },
   {
     category: 'skills',
-    title: 'Languages & Tools',
-    bullets: ['Python, TypeScript, SQL', 'PyTorch, React, Docker'],
-  },
-  {
-    category: 'projects',
-    title: 'Project Name',
-    dates: '2025',
+    title: 'Language',
     bullets: [
-      'What the project does and why you built it.',
-      'One technical detail worth bragging about.',
+      'English (fluent), French (bilingual)',
     ],
   },
+  // Add another entry with a different title (e.g. "Frameworks", "Lab Techniques")
+  // if you want skills grouped into more than one card.
+
+  // --- Projects --------------------------------------------------------
+  {
+    category: 'projects',
+    title: 'FinishInFour',
+    dates: 'Spring 2026',
+    bullets: [
+      'Led development of a database-driven course planning tool in Java, JavaScript, CSS, HTML, and JSP',
+      'Translated academic policies into structured data models and logical workflows',
+    ],
+  },
+  // Copy the block above and paste it here for each project.
+
+  // --- Leadership & Volunteering -----------------------------------------
   {
     category: 'leadership',
-    title: 'Club or Volunteer Role',
-    subtitle: 'Organization',
-    dates: '2024 – present',
-    bullets: ['What you led or organized, and the outcome.'],
+    title: 'Resident Advisor',
+    subtitle: 'San Jose State, Residential Housing Association',
+    dates: 'August 2025 to May 2026',
+    bullets: [
+      'Coordinated programs for 60+ residents and served 24-hour duty shifts responding to emergencies',
+    ],
   },
+  // Copy the block above and paste it here for each role.
+
+  // --- Awards & Certifications --------------------------------------------
   {
     category: 'awards',
-    title: 'Award or Certification Name',
-    dates: '2025',
-    bullets: ['A line of context if it needs one.'],
+    title: 'Rising Spartan Award',
+    dates: 'May 2026',
+    bullets: [
+      'Selected from a team of 40 for exceptional care and dedication as a Resident Advisor',
+    ],
   },
+  // Copy the block above and paste it here for each award/certification.
 ];
 
 // ---------------------------------------------------------------------------
@@ -83,6 +128,9 @@ function renderResume(): void {
   const tabList = document.getElementById('resume-tabs');
   const panel = document.getElementById('resume-panel');
   if (!tabList || !panel) return;
+
+  // Capture panel in a non-nullable variable for closures
+  const resumePanel = panel;
 
   const usedCategories = CATEGORY_ORDER.filter((cat) =>
     RESUME_ENTRIES.some((entry) => entry.category === cat)
@@ -101,8 +149,8 @@ function renderResume(): void {
     const entries = RESUME_ENTRIES.filter((entry) => entry.category === category);
     const meta = CATEGORY_META[category];
 
-    panel!.style.setProperty('--tab-color', meta.color);
-    panel!.innerHTML = entries
+    resumePanel.style.setProperty('--tab-color', meta.color);
+    resumePanel.innerHTML = entries
       .map((entry, i) => {
         const sub = [entry.subtitle, entry.dates].filter(Boolean).join(' · ');
         return `
@@ -121,7 +169,7 @@ function renderResume(): void {
       })
       .join('');
 
-    Array.from(panel!.querySelectorAll<HTMLButtonElement>('.resume-entry-head')).forEach(
+    Array.from(resumePanel.querySelectorAll<HTMLButtonElement>('.resume-entry-head')).forEach(
       (head) => {
         head.addEventListener('click', () => {
           const body = head.nextElementSibling as HTMLElement;
