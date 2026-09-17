@@ -43,6 +43,18 @@ const RESUME_ENTRIES: ResumeEntry[] = [
       'Assisted Systems Engineer spec authors in crafting multi-functional requirements in DOORS Next Gen',
     ],
   },
+  {
+        category: 'work',
+        title: 'Project Intern',
+        subtitle: 'Stanford Research Institute',
+        dates: 'February 2026 to May 2026',
+        bullets: [
+            'Collaborated internationally with a team of 10 from SJSU, SRI, and Technische Hochschule Ingolstadt',
+            'Developed a grammar formalizer enabling domain experts to work with AI models via OpenAI tokens',
+            'Designed a Human-in-the-Loop validator to ensure grammar change outputs matched desired outcomes',
+            'Containerized and version-controlled project components using Docker and GitLab',
+        ],
+    },
   // Copy the block above and paste it here for each job/internship.
 
   // --- Education -----------------------------------------------------
