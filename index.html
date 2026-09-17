@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jordan Avery — Software & ML Engineer</title>
+<meta name="description" content="Portfolio and resume of Jordan Avery, software engineer working across backend systems and machine learning.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="wordmark" href="#top">Jordan Avery</a>
+  <nav class="nav">
+    <a href="#about">About</a>
+    <a href="#projects">Projects</a>
+    <a href="#resume">Resume</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <h1>I build backend systems and the ML pipelines that sit on top of them.</h1>
+    <p class="hero-sub">Software engineer with a data & machine learning focus. Currently based in Berkeley, CA, open to full-time roles.</p>
+    <div class="hero-links">
+      <a href="https://github.com/yourusername" class="link-primary">GitHub</a>
+      <a href="assets/resume.pdf" class="link-primary">Resume</a>
+      <a href="mailto:you@example.com" class="link-primary">Email</a>
+    </div>
+  </section>
+
+  <section id="about" class="section">
+    <h2>About</h2>
+    <div class="prose">
+      <p>
+        I'm a software engineer who splits time between building production backend
+        systems and the machine learning models that rely on them. I like the problems
+        that live at that boundary — getting a model from a notebook into something
+        that serves real traffic, reliably, at reasonable cost.
+      </p>
+      <p>
+        Most recently I've been working with Python and Go on the backend, and
+        PyTorch for model work. I care about code that's easy for the next person
+        to read, and about the parts of ML engineering that don't show up in a
+        paper: data pipelines, monitoring, and knowing when a model has quietly
+        started to drift.
+      </p>
+      <p>
+        Outside of work I contribute to a couple of open source projects and write
+        occasionally about things I've learned the hard way.
+      </p>
+    </div>
+  </section>
+
+  <section id="projects" class="section">
+    <h2>Projects</h2>
+
+    <div class="filter-bar" role="group" aria-label="Filter projects by area">
+      <button class="filter-btn is-active" type="button" data-filter="all" aria-pressed="true">All</button>
+      <button class="filter-btn" type="button" data-filter="backend" aria-pressed="false">Backend</button>
+      <button class="filter-btn" type="button" data-filter="ml" aria-pressed="false">ML</button>
+      <button class="filter-btn" type="button" data-filter="infra" aria-pressed="false">Infra</button>
+    </div>
+
+    <ul class="project-list">
+
+      <li class="project" data-tags="backend">
+        <div class="project-head">
+          <h3><a href="https://github.com/yourusername/project-one">Project One</a></h3>
+          <span class="project-stack">Python, PostgreSQL, Redis</span>
+        </div>
+        <p>
+          A short, specific description of what this project does and why it
+          exists — one or two sentences, written for someone skimming quickly.
+        </p>
+      </li>
+
+      <li class="project" data-tags="ml,backend">
+        <div class="project-head">
+          <h3><a href="https://github.com/yourusername/project-two">Project Two</a></h3>
+          <span class="project-stack">PyTorch, FastAPI, Docker</span>
+        </div>
+        <p>
+          Same idea: what it does, what problem it solves, and what's interesting
+          about how it's built. Link to a live demo here if you have one.
+        </p>
+      </li>
+
+      <li class="project" data-tags="infra,backend">
+        <div class="project-head">
+          <h3><a href="https://github.com/yourusername/project-three">Project Three</a></h3>
+          <span class="project-stack">Go, gRPC, Kubernetes</span>
+        </div>
+        <p>
+          A third project entry. Three to five solid projects is usually plenty —
+          resist the urge to list every repo you've ever pushed to.
+        </p>
+      </li>
+
+    </ul>
+  </section>
+
+  <section id="resume" class="section">
+    <h2>Resume</h2>
+    <p class="prose">
+      <a href="assets/resume.pdf" class="link-primary">Download the PDF</a> or view it below.
+    </p>
+    <div class="resume-embed">
+      <iframe src="assets/resume.pdf" title="Resume PDF" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <section id="contact" class="section">
+    <h2>Contact</h2>
+    <p class="prose">
+      The fastest way to reach me is email. I'm also on GitHub and LinkedIn.
+    </p>
+    <ul class="contact-list">
+      <li>
+        <a href="mailto:you@example.com">you@example.com</a>
+        <button id="copy-email" class="copy-btn" type="button" data-email="you@example.com">Copy email</button>
+      </li>
+      <li><a href="https://github.com/yourusername">github.com/yourusername</a></li>
+      <li><a href="https://linkedin.com/in/yourusername">linkedin.com/in/yourusername</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Jordan Avery, built with HTML, CSS, and TypeScript.</p>
+</footer>
+
+<script src="assets/main.js" defer></script>
+</body>
+</html>
