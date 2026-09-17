@@ -55,6 +55,15 @@ const RESUME_ENTRIES: ResumeEntry[] = [
             'Containerized and version-controlled project components using Docker and GitLab',
         ],
     },
+    {
+        category: 'work',
+        title: 'Instructional Student Assistant',
+        subtitle: 'Physics Department at San Jose State University',
+        dates: 'May 2025 to August 2026',
+        bullets: [
+        'Selected to grade assignments for Physics 50 based on strong academic performance',
+        ],
+    },
   // Copy the block above and paste it here for each job/internship.
 
   // --- Education -----------------------------------------------------
