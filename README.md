@@ -33,15 +33,31 @@ Open `index.html` and replace:
 - **About** — the two or three paragraphs in the `#about` section.
 - **Projects** — each `<li class="project">` block. Three to five strong
   projects beats a long list of every repo you've made.
-- **Resume** — drop your real PDF at `assets/resume.pdf` (replacing the
-  placeholder note in that folder). The page already links to and embeds it.
+- **Resume** — drop your real PDF at `assets/resume.pdf` for the download
+  link. But the main resume content on the page is now data-driven: open
+  `src/main.ts` and edit the `RESUME_ENTRIES` array near the top. Each entry
+  looks like:
+
+  ```ts
+  {
+    category: 'work', // 'work' | 'education' | 'skills' | 'projects' | 'leadership' | 'awards'
+    title: 'Software Engineer Intern',
+    subtitle: 'Company Name',   // optional
+    dates: 'Summer 2025',       // optional
+    bullets: ['What you did.', 'What changed because of it.'],
+  }
+  ```
+
+  Add as many entries as you want in any category — the tabs and accordion
+  render straight from this list, so there's no HTML to touch. Remember to
+  run `npm run build` after editing (or let the GitHub Action do it on push).
 
 Colors and type live at the top of `assets/style.css` under `:root` (and
 `:root[data-theme="dark"]` for the dark palette) if you want to adjust them.
 
-If you add or remove projects, give each `<li class="project">` a
-`data-tags="backend,ml"`-style attribute matching one of the filter buttons
-above the list, so the filter continues to work.
+The site uses `color-mix()`, a modern CSS function supported in all current
+browsers (Chrome/Edge 111+, Safari 16.2+, Firefox 113+) — worth knowing if
+you ever check it in a very old browser and a color looks slightly off.
 
 ## 2. Preview it locally
 
