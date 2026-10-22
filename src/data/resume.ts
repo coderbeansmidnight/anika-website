@@ -12,6 +12,8 @@ export interface Role {
   id: string;
   title: string;
   org: string;
+  // Short name for the timeline chart labels.
+  short: string;
   start: string;
   end: string | null;
   kind: 'research' | 'industry' | 'teaching' | 'leadership';
@@ -52,7 +54,9 @@ export const ROLES: Role[] = [
   {
     id: 'space-force',
     title: 'AI Student Researcher',
-    org: 'United States Space Force',
+    // Collaboration through NewSpace @ Berkeley; not employed by the Space Force directly.
+    org: 'NewSpace @ Berkeley, in collaboration with the U.S. Space Force',
+    short: 'NewSpace @ Berkeley',
     start: '2026-09',
     end: null,
     kind: 'research',
@@ -66,6 +70,7 @@ export const ROLES: Role[] = [
     id: 'carruthers',
     title: 'NASA Carruthers Mission URAP | Research Intern',
     org: 'UC Berkeley Space Sciences Laboratory',
+    short: 'NASA Carruthers',
     start: '2026-09',
     end: null,
     kind: 'research',
@@ -77,6 +82,7 @@ export const ROLES: Role[] = [
     id: 'lockheed',
     title: 'Systems Engineering Intern and Co-op',
     org: 'Lockheed Martin',
+    short: 'Lockheed Martin',
     start: '2025-05',
     end: '2026-08',
     kind: 'industry',
@@ -90,7 +96,9 @@ export const ROLES: Role[] = [
   {
     id: 'sri',
     title: 'AI Software Project Intern',
-    org: 'Stanford Research Institute (SRI)',
+    // Collaboration through a San José State University course.
+    org: 'San José State University course, in collaboration with Stanford Research Institute (SRI)',
+    short: 'SRI × SJSU course',
     start: '2026-02',
     end: '2026-06',
     kind: 'industry',
@@ -105,6 +113,7 @@ export const ROLES: Role[] = [
     id: 'isa',
     title: 'Instructional Student Assistant',
     org: 'San José State University, Physics Department',
+    short: 'SJSU Physics',
     start: '2025-08',
     end: '2026-05',
     kind: 'teaching',
@@ -120,6 +129,7 @@ export const LEADERSHIP: Role[] = [
     id: 'swe',
     title: 'Society of Women Engineers',
     org: 'Professional Development Committee Chair at SJSU + Professional Development Month Chair at UC Berkeley',
+    short: 'Society of Women Engineers',
     start: '2024-08',
     end: null,
     kind: 'leadership',
@@ -130,7 +140,8 @@ export const LEADERSHIP: Role[] = [
   {
     id: 'ra',
     title: 'Resident Advisor',
-    org: '',
+    org: 'San José State University',
+    short: 'Resident Advisor',
     start: '2025-07',
     end: '2026-05',
     kind: 'leadership',
