@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020", "DOM"],
-    "module": "none",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "rootDir": "src",
-    "outDir": "assets",
-    "sourceMap": true
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["vite/client"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src", "vite.config.ts"]
 }

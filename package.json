@@ -1,13 +1,16 @@
 {
-  "name": "personal-site",
-  "version": "1.0.0",
+  "name": "anika-website",
+  "version": "2.0.0",
   "private": true,
-  "description": "Personal portfolio site, compiled from TypeScript.",
+  "type": "module",
+  "description": "Anika Manjesh's personal site. Built with Vite + TypeScript.",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc --watch"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "^5.6.2"
+    "typescript": "~5.9.3",
+    "vite": "8.3.5"
   }
 }
