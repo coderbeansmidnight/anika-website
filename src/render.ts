@@ -13,6 +13,7 @@ import {
   SKILL_GROUPS,
   SPOKEN_LANGUAGES,
   type Role,
+  type Skill,
   type SkillGroup,
 } from './data/resume.ts';
 
@@ -44,6 +45,28 @@ const KIND_LABEL: Record<Role['kind'], string> = {
   teaching: 'Teaching',
   leadership: 'Leadership',
 };
+
+// Where a skill was used: one entry per linked role, with the bullet that mentions it.
+export interface Evidence {
+  roleId: string;
+  label: string;
+  quote: string | null;
+}
+
+export const SITE_LABEL = 'This website';
+
+export function evidenceFor(skill: Skill): Evidence[] {
+  const needle = (skill.match ?? skill.name).toLowerCase();
+  return skill.usedIn.map((id) => {
+    if (id === 'site') {
+      return { roleId: id, label: SITE_LABEL, quote: 'Hand-built with HTML, CSS, and TypeScript (compiled to JavaScript).' };
+    }
+    const role = [...ROLES, ...LEADERSHIP].find((r) => r.id === id);
+    if (!role) throw new Error(`Skill "${skill.name}" links to unknown role "${id}"`);
+    const quote = role.bullets.find((b) => b.toLowerCase().includes(needle)) ?? null;
+    return { roleId: id, label: role.short, quote };
+  });
+}
 
 function roleCard(role: Role): string {
   return `
@@ -87,15 +110,21 @@ export const sections: Record<string, () => string> = {
 
   leadership: () => LEADERSHIP.map(roleCard).join(''),
 
+  // Text version of the skills chart (and the no-JS fallback).
   skills: () =>
     (Object.keys(SKILL_GROUPS) as SkillGroup[])
       .map(
         (group) => `
-        <div class="skill-group" data-group="${group}">
+        <div class="skill-group">
           <h3>${SKILL_GROUPS[group]}</h3>
           <ul>
             ${SKILLS.filter((s) => s.group === group)
-              .map((s) => `<li class="skill-chip" data-group="${group}">${escapeHtml(s.name)}</li>`)
+              .map((s) => {
+                const used = evidenceFor(s).map((e) => e.label);
+                return `<li><strong>${escapeHtml(s.name)}</strong><span>${
+                  used.length ? `Used in: ${escapeHtml(used.join(', '))}` : 'Listed on resume'
+                }</span></li>`;
+              })
               .join('')}
           </ul>
         </div>`

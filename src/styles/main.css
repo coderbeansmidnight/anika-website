@@ -13,12 +13,13 @@
   --accent-ink: #FFFFFF;
   --accent-soft: #F7E1D8;
 
-  /* Categorical colors, used by role kinds and skill groups */
-  --c-blue: #2B64C8;
-  --c-teal: #0C7F72;
-  --c-amber: #9A6200;
-  --c-violet: #6F45C9;
-  --c-coral: #C2401F;
+  /* Categorical colors for role kinds, in validated order (CVD-safe adjacent
+     pairs). Two light steps sit under 3:1 on white, so the chart always
+     carries text labels alongside them. */
+  --k-research: #2A78D6;
+  --k-industry: #EB6834;
+  --k-teaching: #1BAF7A;
+  --k-leadership: #EDA100;
 
   --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -46,22 +47,21 @@
   --accent-ink: #0B1020;
   --accent-soft: #3A2328;
 
-  --c-blue: #7AA7FF;
-  --c-teal: #4FD1BE;
-  --c-amber: #F2B84B;
-  --c-violet: #B39BFF;
-  --c-coral: #FF8A6B;
+  --k-research: #3987E5;
+  --k-industry: #D95926;
+  --k-teaching: #199E70;
+  --k-leadership: #C98500;
 
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.6);
 
   color-scheme: dark;
 }
 
-[data-kind="research"], [data-group="research"] { --cat: var(--c-violet); }
-[data-kind="industry"], [data-group="engineering"] { --cat: var(--c-blue); }
-[data-kind="teaching"], [data-group="design"] { --cat: var(--c-amber); }
-[data-kind="leadership"], [data-group="code"] { --cat: var(--c-teal); }
-[data-group="data"] { --cat: var(--c-coral); }
+[data-kind="research"] { --cat: var(--k-research); }
+[data-kind="industry"] { --cat: var(--k-industry); }
+[data-kind="teaching"] { --cat: var(--k-teaching); }
+[data-kind="leadership"] { --cat: var(--k-leadership); }
+[data-kind="site"] { --cat: var(--muted); }
 
 /* ---------------------------------------------------------------------------
    Base
@@ -118,6 +118,15 @@ a:hover { color: var(--accent); text-decoration-color: currentColor; }
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .skip-link {
@@ -371,7 +380,11 @@ main { display: block; }
 }
 .role:hover { box-shadow: var(--shadow); }
 .role:focus { outline: none; }
-.role.is-highlighted { border-color: var(--cat); box-shadow: var(--shadow); }
+.role.is-highlighted { animation: role-flash 2.2s var(--ease); }
+@keyframes role-flash {
+  0%, 40% { border-color: var(--cat); box-shadow: 0 0 0 4px color-mix(in srgb, var(--cat) 25%, transparent), var(--shadow); }
+  100% { border-color: var(--line); box-shadow: none; }
+}
 
 .role-meta { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
 .role-dates { font: 400 0.82rem/1.4 var(--font-mono); color: var(--muted); }
@@ -383,15 +396,15 @@ main { display: block; }
   font: 500 0.75rem/1 var(--font-sans);
   padding: 5px 9px 5px 8px;
   border-radius: 999px;
-  color: var(--cat);
-  background: color-mix(in srgb, var(--cat) 12%, transparent);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--cat) 14%, transparent);
 }
 .chip::before {
   content: '';
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: currentColor;
+  background: var(--cat);
 }
 
 .role-title { font-size: 1.25rem; font-weight: 700; }
@@ -427,17 +440,12 @@ main { display: block; }
 .skill-group h3 {
   font: 600 0.8rem/1 var(--font-mono);
   letter-spacing: 0;
-  color: var(--cat);
-  margin-bottom: 14px;
+  color: var(--accent);
+  margin-bottom: 12px;
 }
-.skill-group ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.skill-chip {
-  font-size: 0.9rem;
-  padding: 5px 11px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--bg);
-}
+.skill-group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.skill-group li { display: grid; line-height: 1.35; font-size: 0.95rem; }
+.skill-group li span { color: var(--muted); font-size: 0.85rem; }
 .skills-extra { grid-column: 1 / -1; color: var(--muted); font-size: 0.95rem; }
 
 /* ---------------------------------------------------------------------------

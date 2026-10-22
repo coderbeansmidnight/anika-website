@@ -38,6 +38,9 @@
       <a href="#contact">Contact</a>
     </nav>
     <div class="header-actions">
+      <button class="cmdk-trigger" type="button" data-cmdk-open hidden aria-label="Open command menu" aria-keyshortcuts="Meta+K Control+K">
+        <span>Jump to…</span><kbd><span class="kbd-mod">⌘</span>K</kbd>
+      </button>
       <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark mode" aria-pressed="false">
         <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
@@ -76,15 +79,48 @@
     <section id="experience" class="section" aria-labelledby="experience-title">
       <div class="section-head">
         <h2 id="experience-title" class="section-title"><span class="section-index" aria-hidden="true">02</span>Experience</h2>
+        <p class="section-stat" id="timeline-stat"></p>
       </div>
+      <figure class="viz-card timeline">
+        <div class="viz-legend" aria-hidden="true">
+          <span data-kind="research">Research</span>
+          <span data-kind="industry">Industry</span>
+          <span data-kind="teaching">Teaching</span>
+          <span data-kind="leadership">Leadership</span>
+        </div>
+        <div id="timeline-chart" class="viz-chart"></div>
+        <div id="timeline-readout" class="readout" aria-live="polite">
+          <p class="readout-hint">Hover or tap a bar to preview a role. Click to jump to its details below.</p>
+        </div>
+        <figcaption class="visually-hidden">Timeline of roles from 2024 to now. Full details for every role are listed below.</figcaption>
+      </figure>
       <div class="roles"><!--@experience--></div>
     </section>
 
     <section id="skills" class="section" aria-labelledby="skills-title">
       <div class="section-head">
         <h2 id="skills-title" class="section-title"><span class="section-index" aria-hidden="true">03</span>Skills</h2>
+        <p class="section-stat">Each line links a skill to a role where my resume shows it in use.</p>
       </div>
-      <div class="skill-groups"><!--@skills--></div>
+      <div id="skills-filters" class="filters" role="group" aria-label="Filter skills by category"></div>
+      <div class="skills-layout">
+        <figure class="viz-card skills-viz">
+          <ul class="viz-legend readout-key" aria-hidden="true">
+            <li><span class="key-dot"></span>Used in a role</li>
+            <li><span class="key-dot is-hollow"></span>Listed on my resume</li>
+            <li class="legend-hint">Tap a skill or role to trace it</li>
+          </ul>
+          <div id="skills-chart" class="viz-chart"></div>
+          <figcaption class="visually-hidden">Network of skills and the roles they were used in. The same information is in the list below.</figcaption>
+        </figure>
+        <div id="skills-readout" class="readout readout-card" aria-live="polite">
+          <p class="readout-hint">Pick a skill to see where I've used it, or a role to see its skills.</p>
+        </div>
+      </div>
+      <details id="skills-list" class="skills-list" open>
+        <summary>View skills as a list</summary>
+        <div class="skill-groups"><!--@skills--></div>
+      </details>
     </section>
 
     <section id="education" class="section" aria-labelledby="education-title">
@@ -100,8 +136,31 @@
 
   </div>
 
+  <section id="playground" class="section" aria-labelledby="playground-title">
+    <div class="section-head">
+      <h2 id="playground-title" class="section-title"><span class="section-index" aria-hidden="true">06</span>Guess the correlation</h2>
+      <p class="section-stat">A quick break. How strong is the linear relationship?</p>
+    </div>
+    <div class="viz-card corr">
+      <div id="corr-chart" class="corr-chart"></div>
+      <div class="corr-controls">
+        <label for="corr-guess" class="corr-label-text">Your guess for <i>r</i></label>
+        <output id="corr-guess-value" for="corr-guess" class="corr-guess-value">+0.00</output>
+        <input id="corr-guess" type="range" min="-1" max="1" step="0.01" value="0" aria-describedby="corr-scale">
+        <div id="corr-scale" class="corr-scale" aria-hidden="true"><span>−1</span><span>0</span><span>+1</span></div>
+        <div class="corr-buttons">
+          <button id="corr-check" class="btn btn-primary" type="button">Check</button>
+          <button id="corr-next" class="btn" type="button" hidden>New plot</button>
+        </div>
+        <p id="corr-result" class="corr-result" role="status" aria-live="polite"></p>
+        <p id="corr-score" class="corr-score"></p>
+        <p class="corr-note">Pearson's <i>r</i> runs from −1 (perfect downhill line) through 0 (no linear pattern) to +1 (perfect uphill line). 60 points per plot, generated in your browser.</p>
+      </div>
+    </div>
+  </section>
+
   <section id="contact" class="section section-narrow contact" aria-labelledby="contact-title">
-    <h2 id="contact-title" class="section-title"><span class="section-index" aria-hidden="true">06</span>Say hello</h2>
+    <h2 id="contact-title" class="section-title"><span class="section-index" aria-hidden="true">07</span>Say hello</h2>
     <p class="prose">The fastest way to reach me is email. I'm also on GitHub and LinkedIn.</p>
     <div class="contact-email">
       <a href="mailto:{{email}}">{{email}}</a>
@@ -116,6 +175,16 @@
   </section>
 
 </main>
+
+<dialog id="cmdk" class="cmdk" aria-label="Command menu">
+  <div class="cmdk-panel">
+    <input id="cmdk-input" class="cmdk-input" type="text" placeholder="Jump to a section, role, or action…"
+      role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list" autocomplete="off" spellcheck="false">
+    <ul id="cmdk-list" class="cmdk-list" role="listbox" aria-label="Commands"></ul>
+    <p class="cmdk-footer"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> select</span><span><kbd>esc</kbd> close</span></p>
+    <p id="cmdk-status" class="visually-hidden" role="status" aria-live="polite"></p>
+  </div>
+</dialog>
 
 <footer class="site-footer">
   <p>© {{name}} · Built with TypeScript, SVG, and Vite.</p>

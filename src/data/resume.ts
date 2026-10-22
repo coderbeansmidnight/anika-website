@@ -35,6 +35,8 @@ export interface Skill {
   // Role ids (from ROLES/LEADERSHIP below) or 'site' for this website.
   // Leave empty for skills listed on the resume without a specific role.
   usedIn: string[];
+  // Text to look for in that role's bullets, to quote as evidence. Defaults to `name`.
+  match?: string;
 }
 
 export const PROFILE = {
@@ -194,10 +196,10 @@ export const SKILLS: Skill[] = [
 
   { name: 'Pandas', group: 'data', usedIn: ['lockheed'] },
   { name: 'Tableau', group: 'data', usedIn: [] },
-  { name: 'Data visualization', group: 'data', usedIn: ['lockheed'] },
-  { name: 'OpenAI API', group: 'data', usedIn: ['sri'] },
+  { name: 'Data visualization', group: 'data', usedIn: ['lockheed'], match: 'visualizations' },
+  { name: 'OpenAI API', group: 'data', usedIn: ['sri'], match: 'OpenAI' },
 
-  { name: 'Git', group: 'engineering', usedIn: ['sri'] },
+  { name: 'Git', group: 'engineering', usedIn: ['sri'], match: 'version-controlled' },
   { name: 'GitLab', group: 'engineering', usedIn: ['sri'] },
   { name: 'Docker', group: 'engineering', usedIn: ['sri'] },
   { name: 'REST APIs', group: 'engineering', usedIn: [] },
@@ -207,6 +209,6 @@ export const SKILLS: Skill[] = [
   { name: 'Confluence', group: 'design', usedIn: [] },
 
   { name: 'AI agents', group: 'research', usedIn: ['space-force'] },
-  { name: 'Human-in-the-loop', group: 'research', usedIn: ['sri', 'space-force'] },
-  { name: 'Satellite image analysis', group: 'research', usedIn: ['carruthers'] },
+  { name: 'Human-in-the-loop', group: 'research', usedIn: ['sri', 'space-force'], match: 'human' },
+  { name: 'Satellite image analysis', group: 'research', usedIn: ['carruthers'], match: 'images from satellite' },
 ];

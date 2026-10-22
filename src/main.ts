@@ -1,7 +1,12 @@
 // Entry point: wires up the page's interactive pieces.
 
 import './styles/main.css';
+import './styles/viz.css';
+import { initCommandPalette } from './commandPalette';
+import { initCorrelation } from './correlation';
+import { initSkills } from './skills';
 import { initTheme } from './theme';
+import { initTimeline } from './timeline';
 
 // ---------------------------------------------------------------------------
 // Header: border once the page scrolls; nav highlight for the current section
@@ -39,7 +44,9 @@ function initHeader(): void {
 
 function initReveal(): void {
   const targets = Array.from(document.querySelectorAll<HTMLElement>('main > .section, #resume > .section'));
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // Skip on deep links (#skills etc.): the browser jumps there after this runs,
+  // and the target shouldn't fade in from blank.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || location.hash) return;
 
   const observer = new IntersectionObserver(
     (entries) => {
@@ -88,6 +95,10 @@ const inits: Array<[string, () => void]> = [
   ['header', initHeader],
   ['reveal', initReveal],
   ['copy email', initCopyEmail],
+  ['timeline', initTimeline],
+  ['skills', initSkills],
+  ['correlation', initCorrelation],
+  ['command palette', initCommandPalette],
 ];
 
 for (const [name, fn] of inits) {
