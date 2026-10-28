@@ -1,5 +1,5 @@
-// Decorative dot-particle whale (plus a few tiny fish) at the bottom of the
-// page. Points drift as noise and gather into shape as the band scrolls into
+// Decorative dot-particle whale (plus a few tiny fish and rising bubbles) at
+// the bottom of the page. Points drift as noise and gather into shape as the band scrolls into
 // view (and scatter again on the way back up). The pointer pushes dots aside;
 // a click or tap splashes them apart. Purely decorative: the canvas is
 // aria-hidden, pauses offscreen, and draws a still scene under
@@ -60,6 +60,15 @@ interface Particle {
   // Current pointer push, in pixels
   px: number;
   py: number;
+}
+
+interface Bubble {
+  x: number;
+  y: number;
+  r: number;
+  vy: number;
+  phase: number;
+  age: number;
 }
 
 interface Fish {
@@ -169,9 +178,48 @@ export function initWhale(): void {
   let raf = 0;
   let splashAt = -Infinity;
   const pointer = { x: -9999, y: -9999 };
+  const bubbles: Bubble[] = [];
+  let lastTime = 0;
+  let nextSpout = 1.5;
+  const nextFishBubble = school.map(() => 2 + Math.random() * 4);
 
+  // Dots use the site's coral accent (it has its own light and dark step).
   function readColor(): void {
-    color = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#1C1B19';
+    color = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#C2401F';
+  }
+
+  function spawnBubble(x: number, y: number, size: number): void {
+    if (bubbles.length > 60) return;
+    bubbles.push({
+      x: x + (Math.random() - 0.5) * 4,
+      y,
+      r: size * (0.6 + Math.random() * 0.8),
+      vy: 18 + Math.random() * 22,
+      phase: Math.random() * Math.PI * 2,
+      age: 0,
+    });
+  }
+
+  // Bubbles drift upward with a little wobble, grow slightly, and fade out
+  // as they near the top of the band.
+  function drawBubbles(dt: number): void {
+    ctx!.strokeStyle = color;
+    ctx!.lineWidth = 1.3;
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+      const b = bubbles[i];
+      b.age += dt;
+      b.y -= b.vy * dt;
+      const x = b.x + Math.sin(b.age * 3 + b.phase) * 3;
+      const r = b.r * (1 + b.age * 0.08);
+      if (b.y < -r) {
+        bubbles.splice(i, 1);
+        continue;
+      }
+      ctx!.globalAlpha = 0.85 * clamp01(b.age / 0.3) * clamp01(b.y / (height * 0.4));
+      ctx!.beginPath();
+      ctx!.arc(x, b.y, r, 0, Math.PI * 2);
+      ctx!.stroke();
+    }
   }
 
   function resize(): void {
@@ -196,8 +244,8 @@ export function initWhale(): void {
 
     // Whale size and placement: a little left of center to leave the
     // bottom-right corner for the fish.
-    const scale = Math.min((width * (narrow ? 0.9 : 0.74)) / WHALE.w, (height * 0.86) / WHALE.h);
-    const cx = width * 0.46 + (reduced ? 0 : Math.sin(t * 0.15) * width * 0.03);
+    const scale = Math.min((width * (narrow ? 0.84 : 0.74)) / WHALE.w, (height * 0.86) / WHALE.h);
+    const cx = width * (narrow ? 0.5 : 0.46) + (reduced ? 0 : Math.sin(t * 0.15) * width * 0.03);
     const cy = height * 0.46 + (reduced ? 0 : Math.sin(t * 0.6) * 4);
     const yaw = reduced ? -0.25 : -0.25 + Math.sin(t * 0.25) * 0.35;
     const cosY = Math.cos(yaw);
@@ -222,6 +270,32 @@ export function initWhale(): void {
     let form = reduced ? 1 : scrollProgress();
     const since = t - splashAt;
     if (since < 2.4) form *= since < 0.5 ? 1 - ease(since / 0.5) : ease((since - 0.5) / 1.9);
+
+    // Bubbles: a short burst from the blowhole every few seconds, and the odd
+    // single bubble from a fish, only while everything is formed.
+    const dt = lastTime ? Math.min(0.05, t - lastTime) : 0;
+    lastTime = t;
+    if (!reduced && form > 0.9) {
+      if (t > nextSpout) {
+        // Blowhole sits on top of the head, behind the snout (box 92, 32)
+        const bx = 92 - WHALE.w / 2;
+        const by = 32 - WHALE.h / 2;
+        const persp = focal / (focal - bx * sinY * scale * 0.6);
+        const hx = cx + bx * cosY * scale * persp;
+        const hy = cy + by * scale * persp;
+        const count = 4 + Math.floor(Math.random() * 4);
+        for (let i = 0; i < count; i++) {
+          window.setTimeout(() => spawnBubble(hx, hy, 3.4), i * 140);
+        }
+        nextSpout = t + 3 + Math.random() * 3;
+      }
+      fishPos.forEach((f, i) => {
+        if (t < nextFishBubble[i]) return;
+        // Bubble from the fish's mouth, whichever way it's facing
+        spawnBubble(f.x - Math.sign(f.turn) * 17 * f.s, f.y - 2, 2);
+        nextFishBubble[i] = t + 4 + Math.random() * 5;
+      });
+    }
 
     for (const p of particles) {
       let wx: number;
@@ -278,10 +352,11 @@ export function initWhale(): void {
 
       // Nearer points are larger and stronger, like the reference point cloud
       const depthMix = k * near;
-      ctx!.globalAlpha = 0.18 + 0.5 * depthMix + 0.12 * (1 - k);
+      ctx!.globalAlpha = 0.3 + 0.55 * depthMix + 0.1 * (1 - k);
       const size = 1 + 0.9 * depthMix;
       ctx!.fillRect(x, y, size, size);
     }
+    drawBubbles(dt);
     ctx!.globalAlpha = 1;
   }
 
