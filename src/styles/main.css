@@ -544,7 +544,7 @@ main { display: block; }
 .whale-band {
   position: relative;
   max-width: var(--max);
-  height: clamp(170px, 30vw, 320px);
+  height: clamp(210px, 34vw, 380px);
   margin: clamp(40px, 6vw, 72px) auto 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;

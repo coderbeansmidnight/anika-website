@@ -1,24 +1,54 @@
-// Decorative dot-particle whale at the bottom of the page. Points drift as
-// noise and gather into a swimming whale as the band scrolls into view (and
-// scatter again on the way back up). The pointer pushes dots aside; a click
-// or tap splashes them apart. Purely decorative: the canvas is aria-hidden,
-// pauses offscreen, and draws one still whale under prefers-reduced-motion.
+// Decorative dot-particle whale (plus a few tiny fish) at the bottom of the
+// page. Points drift as noise and gather into shape as the band scrolls into
+// view (and scatter again on the way back up). The pointer pushes dots aside;
+// a click or tap splashes them apart. Purely decorative: the canvas is
+// aria-hidden, pauses offscreen, and draws a still scene under
+// prefers-reduced-motion.
 
 import { prefersReducedMotion } from './svg';
 
-// Whale silhouette, head left, in a 400 × 150 box.
-const BODY =
-  'M10 72 C10 50 40 38 90 36 C150 33 210 38 260 50 C290 57 315 64 335 70 ' +
-  'L370 45 C380 40 395 42 398 48 C385 56 375 66 368 76 ' +
-  'C378 86 392 96 396 104 C388 108 372 104 360 92 ' +
-  'C330 84 300 88 260 94 C210 104 150 110 95 106 C50 103 15 90 10 72 Z';
-const FIN = 'M120 100 C130 120 150 135 175 140 C168 128 158 112 150 102 Z';
-const DORSAL = 'M240 46 C248 36 256 32 262 32 C262 40 262 46 266 52 Z';
-const BOX_W = 400;
-const BOX_H = 150;
+// Humpback-style silhouette, head left, in a 400 × 150 box: rounded head,
+// long belly, narrow tail stock, notched flukes.
+const WHALE = {
+  w: 400,
+  h: 150,
+  body:
+    'M8 62 C14 46 40 34 80 30 C130 25 190 28 240 38 C262 42 280 46 296 52 ' +
+    'C318 59 336 64 352 66 C362 58 372 44 386 36 C392 33 398 35 396 41 ' +
+    'C392 52 382 62 372 70 C384 76 394 88 397 99 C398 105 392 106 386 102 ' +
+    'C372 94 362 84 352 78 C330 82 300 86 268 92 C220 104 160 112 110 110 ' +
+    'C70 108 34 96 16 80 C10 74 7 68 8 62 Z',
+  extras: [
+    // Long pectoral fin (a humpback's signature)
+    'M96 100 C108 118 130 136 160 144 C166 145 168 141 164 138 C146 126 130 112 124 102 Z',
+    // Small hooked dorsal fin
+    'M268 44 C276 36 284 31 292 30 C290 36 290 42 294 50 Z',
+  ],
+  // Thin gaps carved out of the dot cloud: mouth line and throat pleats
+  grooves: [
+    'M10 68 C30 72 55 75 80 72',
+    'M24 80 C55 92 95 99 135 100',
+    'M40 90 C70 99 100 104 140 106',
+  ],
+  eye: { x: 86, y: 64, r: 3 },
+};
+
+// Tiny fish, head left, in a 40 × 20 box.
+const FISH = {
+  w: 40,
+  h: 20,
+  body: 'M3 10 C7 3 19 2 27 8 L37 2 L35 10 L37 18 L27 12 C19 18 7 17 3 10 Z',
+  extras: [] as string[],
+  grooves: [] as string[],
+  eye: { x: 9, y: 9, r: 1.3 },
+};
+
+type Shape = typeof WHALE;
 
 interface Particle {
-  // Home position on the whale (box units, centered), with depth
+  // -1 for the whale, otherwise the index of the fish it belongs to
+  owner: number;
+  // Home position in shape-box units (centered), with depth
   hx: number;
   hy: number;
   hz: number;
@@ -32,51 +62,64 @@ interface Particle {
   py: number;
 }
 
-function sampleWhale(count: number): Particle[] {
+interface Fish {
+  // Home spot as a fraction of the band, plus swim parameters
+  ax: number;
+  ay: number;
+  amp: number;
+  speed: number;
+  phase: number;
+  size: number;
+}
+
+function sampleShape(shape: Shape, count: number, owner: number): Particle[] {
   const probe = document.createElement('canvas').getContext('2d');
   if (!probe) return [];
-  const body = new Path2D(BODY);
-  const fin = new Path2D(FIN);
-  const dorsal = new Path2D(DORSAL);
+  const body = new Path2D(shape.body);
+  const extras = shape.extras.map((d) => new Path2D(d));
+  const grooves = shape.grooves.map((d) => new Path2D(d));
+  probe.lineWidth = 2.6;
+  const carved = (x: number, y: number) =>
+    grooves.some((g) => probe.isPointInStroke(g, x, y)) ||
+    Math.hypot(x - shape.eye.x, y - shape.eye.y) < shape.eye.r;
   const inside = (x: number, y: number) =>
-    probe.isPointInPath(body, x, y) || probe.isPointInPath(fin, x, y) || probe.isPointInPath(dorsal, x, y);
+    (probe.isPointInPath(body, x, y) || extras.some((e) => probe.isPointInPath(e, x, y))) && !carved(x, y);
 
   // Vertical extent of the body per column, so points can wrap around a
   // rounded cross-section instead of sitting on a flat cut-out.
-  const top: number[] = [];
-  const bottom: number[] = [];
-  for (let x = 0; x <= BOX_W; x++) {
-    let lo = -1;
-    let hi = -1;
-    for (let y = 0; y <= BOX_H; y += 2) {
-      if (probe.isPointInPath(body, x, y)) {
-        if (lo === -1) lo = y;
-        hi = y;
-      }
+  const step = shape.w > 100 ? 2 : 0.5;
+  const top = new Map<number, number>();
+  const bottom = new Map<number, number>();
+  for (let x = 0; x <= shape.w; x++) {
+    for (let y = 0; y <= shape.h; y += step) {
+      if (!probe.isPointInPath(body, x, y)) continue;
+      if (!top.has(x)) top.set(x, y);
+      bottom.set(x, y);
     }
-    top.push(lo);
-    bottom.push(hi);
   }
 
   const points: Particle[] = [];
   let guard = 0;
-  while (points.length < count && guard++ < count * 40) {
-    const x = Math.random() * BOX_W;
-    const y = Math.random() * BOX_H;
+  while (points.length < count && guard++ < count * 60) {
+    const x = Math.random() * shape.w;
+    const y = Math.random() * shape.h;
     if (!inside(x, y)) continue;
     const col = Math.round(x);
-    let z = (Math.random() - 0.5) * 6; // fins are thin
-    if (top[col] !== -1 && y >= top[col] && y <= bottom[col]) {
-      const mid = (top[col] + bottom[col]) / 2;
-      const half = Math.max(1, (bottom[col] - top[col]) / 2);
+    let z = (Math.random() - 0.5) * shape.h * 0.04; // fins are thin
+    const lo = top.get(col);
+    const hi = bottom.get(col);
+    if (lo !== undefined && hi !== undefined && y >= lo && y <= hi) {
+      const mid = (lo + hi) / 2;
+      const half = Math.max(0.5, (hi - lo) / 2);
       const t = Math.min(1, Math.abs(y - mid) / half);
       // Mostly on the surface (shell), a few inside, like a point cloud scan.
       const depth = Math.sqrt(1 - t * t) * half * 0.9 * (Math.random() < 0.8 ? 1 : Math.random());
       z = (Math.random() < 0.5 ? -1 : 1) * depth;
     }
     points.push({
-      hx: x - BOX_W / 2,
-      hy: y - BOX_H / 2,
+      owner,
+      hx: x - shape.w / 2,
+      hy: y - shape.h / 2,
       hz: z,
       sx: Math.random(),
       sy: Math.random(),
@@ -87,6 +130,21 @@ function sampleWhale(count: number): Particle[] {
     });
   }
   return points;
+}
+
+// A small school, loosely grouped in the bottom-right corner.
+function makeSchool(count: number): Fish[] {
+  const spots = [
+    [0.84, 0.8], [0.9, 0.88], [0.78, 0.9], [0.92, 0.75], [0.86, 0.95],
+  ];
+  return spots.slice(0, count).map(([ax, ay], i) => ({
+    ax,
+    ay,
+    amp: 0.015 + Math.random() * 0.015,
+    speed: 0.35 + Math.random() * 0.25,
+    phase: i * 1.7 + Math.random(),
+    size: 0.85 + Math.random() * 0.35,
+  }));
 }
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -100,6 +158,7 @@ export function initWhale(): void {
 
   const reduced = prefersReducedMotion();
   const narrow = window.innerWidth < 640;
+  const school = makeSchool(narrow ? 4 : 5);
   // Sampled lazily, the first time the band nears the viewport.
   let particles: Particle[] = [];
 
@@ -124,11 +183,10 @@ export function initWhale(): void {
     ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // 0 when the band is just entering from below, 1 once it's well in view.
+  // 0 when the band is just entering from below, 1 once most of it is in view.
   function scrollProgress(): number {
     const rect = band!.getBoundingClientRect();
-    const vh = window.innerHeight;
-    return clamp01((vh - rect.top) / (rect.height * 0.9 + vh * 0.25));
+    return clamp01((window.innerHeight - rect.top) / (rect.height * 0.85));
   }
 
   function draw(time: number): void {
@@ -136,14 +194,29 @@ export function initWhale(): void {
     ctx!.clearRect(0, 0, width, height);
     ctx!.fillStyle = color;
 
-    // Whale size and placement within the band
-    const scale = Math.min((width * (width < 640 ? 0.86 : 0.62)) / BOX_W, (height * 0.78) / BOX_H);
-    const cx = width / 2 + (reduced ? 0 : Math.sin(t * 0.15) * width * 0.04);
-    const cy = height / 2 + (reduced ? 0 : Math.sin(t * 0.6) * 4);
+    // Whale size and placement: a little left of center to leave the
+    // bottom-right corner for the fish.
+    const scale = Math.min((width * (narrow ? 0.9 : 0.74)) / WHALE.w, (height * 0.86) / WHALE.h);
+    const cx = width * 0.46 + (reduced ? 0 : Math.sin(t * 0.15) * width * 0.03);
+    const cy = height * 0.46 + (reduced ? 0 : Math.sin(t * 0.6) * 4);
     const yaw = reduced ? -0.25 : -0.25 + Math.sin(t * 0.25) * 0.35;
     const cosY = Math.cos(yaw);
     const sinY = Math.sin(yaw);
     const focal = 600;
+
+    // Fish placement for this frame: drift side to side, turning at each end
+    const fishScale = scale * 0.6;
+    const fishPos = school.map((f) => {
+      const swim = reduced ? 0 : t * f.speed + f.phase;
+      return {
+        x: (f.ax + Math.sin(swim) * f.amp) * width,
+        y: f.ay * height + (reduced ? 0 : Math.sin(swim * 2.3) * 2),
+        // Heading: cos(swim) > 0 means moving right, so mirror the left-facing fish
+        turn: reduced ? 1 : -Math.cos(swim),
+        tail: reduced ? 0 : t * 6 + f.phase,
+        s: fishScale * f.size,
+      };
+    });
 
     // Formation: scroll-driven, dipping briefly after a splash
     let form = reduced ? 1 : scrollProgress();
@@ -151,19 +224,32 @@ export function initWhale(): void {
     if (since < 2.4) form *= since < 0.5 ? 1 - ease(since / 0.5) : ease((since - 0.5) / 1.9);
 
     for (const p of particles) {
-      // Swim: a travelling wave that grows toward the tail
-      const along = (p.hx + BOX_W / 2) / BOX_W;
-      const wave = reduced ? 0 : Math.sin(along * 5 - t * 2.2) * 9 * along * along;
-      const x3 = p.hx;
-      const y3 = p.hy + wave;
-      const z3 = p.hz;
+      let wx: number;
+      let wy: number;
+      let near: number;
 
-      // Rotate around the vertical axis, then perspective-project
-      const rx = x3 * cosY + z3 * sinY;
-      const rz = -x3 * sinY + z3 * cosY;
-      const persp = focal / (focal + rz * scale * 0.6);
-      const wx = cx + rx * scale * persp;
-      const wy = cy + y3 * scale * persp;
+      if (p.owner === -1) {
+        // Swim: a travelling wave that grows toward the tail
+        const along = (p.hx + WHALE.w / 2) / WHALE.w;
+        const wave = reduced ? 0 : Math.sin(along * 5 - t * 2.2) * 9 * along * along;
+        const y3 = p.hy + wave;
+        // Rotate around the vertical axis, then perspective-project
+        const rx = p.hx * cosY + p.hz * sinY;
+        const rz = -p.hx * sinY + p.hz * cosY;
+        const persp = focal / (focal + rz * scale * 0.6);
+        wx = cx + rx * scale * persp;
+        wy = cy + y3 * scale * persp;
+        near = clamp01(0.5 - rz / (WHALE.h * 1.2));
+      } else {
+        const f = fishPos[p.owner];
+        const along = (p.hx + FISH.w / 2) / FISH.w;
+        const wag = Math.sin(f.tail) * 2.2 * along * along;
+        // Squash x through the turn so it reads as the fish rotating around
+        const turn = Math.sign(f.turn) * Math.max(0.15, Math.abs(f.turn));
+        wx = f.x + p.hx * f.s * turn + p.hz * f.s * 0.3;
+        wy = f.y + (p.hy + wag) * f.s;
+        near = clamp01(0.5 - p.hz / FISH.h);
+      }
 
       // Scatter: drifting noise across the whole band
       const sx = p.sx * width + Math.sin(t * 0.3 + p.phase) * 18;
@@ -191,7 +277,7 @@ export function initWhale(): void {
       }
 
       // Nearer points are larger and stronger, like the reference point cloud
-      const depthMix = k * clamp01(0.5 - rz / (BOX_H * 1.2));
+      const depthMix = k * near;
       ctx!.globalAlpha = 0.18 + 0.5 * depthMix + 0.12 * (1 - k);
       const size = 1 + 0.9 * depthMix;
       ctx!.fillRect(x, y, size, size);
@@ -206,7 +292,10 @@ export function initWhale(): void {
 
   function start(): void {
     if (!visible) return;
-    if (particles.length === 0) particles = sampleWhale(narrow ? 1100 : 2000);
+    if (particles.length === 0) {
+      particles = sampleShape(WHALE, narrow ? 1500 : 2600, -1);
+      school.forEach((_, i) => particles.push(...sampleShape(FISH, 110, i)));
+    }
     if (reduced) {
       draw(0);
       return;
