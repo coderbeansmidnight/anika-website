@@ -247,6 +247,7 @@
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
+.cmdk-trigger { white-space: nowrap; }
 .cmdk-trigger[hidden] { display: none; }
 .cmdk-trigger:hover { color: var(--ink); border-color: var(--muted); }
 
