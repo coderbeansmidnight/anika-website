@@ -7,6 +7,7 @@ import { initCorrelation } from './correlation';
 import { initSkills } from './skills';
 import { initTheme } from './theme';
 import { initTimeline } from './timeline';
+import { initWhale } from './whale';
 
 // ---------------------------------------------------------------------------
 // Header: border once the page scrolls; nav highlight for the current section
@@ -99,6 +100,7 @@ const inits: Array<[string, () => void]> = [
   ['skills', initSkills],
   ['correlation', initCorrelation],
   ['command palette', initCommandPalette],
+  ['whale', initWhale],
 ];
 
 for (const [name, fn] of inits) {
